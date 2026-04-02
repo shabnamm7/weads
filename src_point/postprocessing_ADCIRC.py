@@ -275,7 +275,7 @@ def postprocessing_ADCIRC(inputMeshFile, inputAttrFile,
         tiff_file_list = ['tide.tif', 'ecology.tif', 'Productivity.tif', 'Inundation_depth.tif']
         target_str_list = [['mlw', 'msl', 'mhw', 'MLW_IDW', 'MSL_IDW', 'MHW_IDW', 'HydroClass', 'inundationtime'],
                            ['D', 'B', 'A', 'tb_update', 'new_NWI', 'manning'], ['bio_level'], ['inun_depth']]
-        idw_Flag_list = [False, False, False, False]
+        
         dtype_list = [['gdal.GDT_Float32'],
                       ['gdal.GDT_Float32'], ['gdal.GDT_Byte'], ['gdal.GDT_Float32']]
         nodata_value_list = [[ndv], [ndv], [Watte_ndv], [ndv]]
@@ -290,12 +290,11 @@ def postprocessing_ADCIRC(inputMeshFile, inputAttrFile,
         else:
             # General ADCIRC max inundation depth file
             target_str_list = [['depth']]  # for eddited max_elevation, should be ['zeta_max']
-        idw_Flag_list = [False]
         dtype_list = [['gdal.GDT_Float32']]
         nodata_value_list = [[ndv]]
 
-    for csv_file, tiff_file, target_str, idw_Flag, dtypes, nodata_values in zip(csv_file_list, tiff_file_list,
-                                                                                target_str_list, idw_Flag_list,
+    for csv_file, tiff_file, target_str, dtypes, nodata_values in zip(csv_file_list, tiff_file_list,
+                                                                                target_str_list, 
                                                                                 dtype_list,
                                                                                 nodata_value_list):
         # Open csv file for point values
@@ -307,7 +306,7 @@ def postprocessing_ADCIRC(inputMeshFile, inputAttrFile,
         print(tiff_file)
 
         # Call the function with corrected file extension
-        interpolate_grid(xx, yy, df, target_str, inputShapeFile, dummy_tiff, tiff_file, idw_Flag=idw_Flag, knn=12,
+        interpolate_grid(xx, yy, df, target_str, inputShapeFile, dummy_tiff, tiff_file, idw_Flag=None, knn=12,
                          dtype_list=dtypes, nodata_value_list=nodata_values, reproject_flag=True, inEPSG=inEPSG,
                          outEPSG=outEPSG)
 

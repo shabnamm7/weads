@@ -630,8 +630,18 @@ def write_clipped_raster(raster_open, raster, clip_file,
 
     return clip_file
 
+def should_use_idw_from_dtype(dtype_value):
+    """
+    Use IDW for floating-point rasters and nearest-neighbor-like interpolation
+    for integer / thematic rasters.
+    """
+    float_types = {
+        gdal.GDT_Float32,
+        gdal.GDT_Float64,
+    }
+    return dtype_value in float_types
 
-def interpolate_grid(xx, yy, df, target_list, inputShapeFile, ref_tiff, output_file, idw_Flag=False, knn=12,
+def interpolate_grid(xx, yy, df, target_list, inputShapeFile, ref_tiff, output_file, idw_Flag=None, knn=12,
                      dtype_list=None, nodata_value_list=None, reproject_flag=False, inEPSG=None, outEPSG=None, mask_flag=True):
     """
     Interpolates values and creates a single GeoTIFF raster file with multiple bands for the target strings.
@@ -679,6 +689,18 @@ def interpolate_grid(xx, yy, df, target_list, inputShapeFile, ref_tiff, output_f
 
         # Initialize a list to hold the interpolated grids for each target
         interpolated_grids = []
+
+        if dtype_list is None:
+            raise ValueError("dtype_list must be provided")
+
+        dtype0 = dtype_list[0]
+
+        # If not explicitly specified, choose interpolation automatically
+        # from output raster dtype.
+        if idw_Flag is None:
+            idw_Flag = should_use_idw_from_dtype(dtype0)
+            print(f"Auto-selected interpolation for {output_file}: "
+                  f"{'IDW' if idw_Flag else 'NN'} based on dtype {dtype0}")
 
         for target_str in target_list:
             assert target_str in df.columns, f"df must contain {target_str} column"
